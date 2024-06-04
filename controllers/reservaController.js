@@ -45,18 +45,23 @@ const reservaController = {
 
     getAll: async(req, res) => {
         try {
+            // buscando e populando todas as reservas
             const reservas = await ReservaModel.find().populate('usuarioId').populate('livroId')
             res.json(reservas)
         } catch (error) {
+            console.log(error)
             res.status(500).json({ error, msg: 'Erro ao buscar as Reservas' });
         }
     },
 
     get: async (req, res) => {
         try {
+            // pegando o id da requisição
             const id = req.params.id
+            // buscando a reserva que corresponde ao id da requisição
             const reserva = await ReservaModel.findById(id).populate('usuarioId').populate('livroId')
 
+            // verificando se a reserva realmente existe
             if (!reserva) {
                 res.status(404).json({ msg: 'Reserva não encontrado!' })
                 return
@@ -64,6 +69,7 @@ const reservaController = {
 
             res.json(reserva)
         } catch (error) {
+            console.log(error)
             res.status(500).json({ error: error, msg: 'Erro ao buscar o reserva' })
         }
     },
@@ -78,12 +84,14 @@ const reservaController = {
                 return
             }
 
+            // excluindo a reserva do array reservas do usuário que fez a reserva
             const usuario = await Usuario.findById(reserva.usuarioId)
             if(usuario){
                 usuario.reservas.pull(reserva._id)
                 await usuario.save()
             }
 
+            // deletando a reserva da collection reservas
             const reserva_deletada = await ReservaModel.findByIdAndDelete(id)
             
             res.status(200).json({ reserva_deletada, msg: 'Reserva excluída com sucesso!' })
@@ -95,10 +103,14 @@ const reservaController = {
 
     update: async(req, res) => {
         try {
+            // buscando o id da reserva q será alterada
             const id = req.params.id
+            // buscando o novo id
             const novoUsuarioId = req.body.usuarioId
+            // buscando o novo livro
             const novoLivroId = req.body.livroId
 
+            // buscando a reserva que será alterada
             const reserva = await ReservaModel.findById(id)
 
             // verificando se a reserva existe
@@ -133,6 +145,7 @@ const reservaController = {
                 await novoUsuario.save()
             }
 
+            // atribuindo os novos valores a nova reserva
             reserva.livroId = novoLivroId
             reserva.usuarioId = novoUsuarioId
             reserva.data_reserva = req.body.data_reserva || reserva.data_reserva
@@ -158,7 +171,6 @@ const reservaController = {
                 return
             }
             
-            
             // const devolucao = new Date()
             // reserva.data_devolucao_real = devolucao
             // await reserva.save()
@@ -169,12 +181,11 @@ const reservaController = {
             if(diasAtraso > 0){
                 valorMulta = diasAtraso * 5
 
-                const novaMulta =
-                    {
-                        valor: valorMulta,
-                        situacao: 'Esperando pagamento!',
-                        livroId: reserva.livroId,
-                    }
+                const novaMulta = {
+                    valor: valorMulta,
+                    situacao: 'Esperando pagamento!',
+                    livroId: reserva.livroId,
+                }
                 
     
                 user.multas.push(novaMulta)
