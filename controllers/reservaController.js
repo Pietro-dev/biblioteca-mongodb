@@ -45,7 +45,7 @@ const reservaController = {
 
     getAll: async(req, res) => {
         try {
-            const reservas = await ReservaModel.find()
+            const reservas = await ReservaModel.find().populate('usuarioId').populate('livroId')
             res.json(reservas)
         } catch (error) {
             res.status(500).json({ error, msg: 'Erro ao buscar as Reservas' });
@@ -55,7 +55,7 @@ const reservaController = {
     get: async (req, res) => {
         try {
             const id = req.params.id
-            const reserva = await ReservaModel.findById(id)
+            const reserva = await ReservaModel.findById(id).populate('usuarioId').populate('livroId')
 
             if (!reserva) {
                 res.status(404).json({ msg: 'Reserva não encontrado!' })

@@ -19,28 +19,33 @@ const usuarioController = {
 
     getAll: async (req, res) => {
         try {
-            const usuarios = await UsuarioModel.find();
-            res.json(usuarios);
+            const usuarios = await UsuarioModel.find().populate({
+                path: 'reservas',
+                populate: {path: 'livroId'}
+            }).populate({
+                path: 'multas.livroId'
+            })
+            res.json(usuarios)
         } catch (error) {
-            console.error('Erro ao buscar usuarios:', error);
-            res.status(500).json({ msg: 'Erro ao buscar os usuarios' });
+            console.error('Erro ao buscar usuarios:', error)
+            res.status(500).json({ msg: 'Erro ao buscar os usuarios' })
         }
     },
 
     get: async (req, res) => {
         try {
-            const id = req.params.id;
-            const usuario = await UsuarioModel.findById(id);
+            const id = req.params.id
+            const usuario = await UsuarioModel.findById(id)
 
             if (!usuario) {
-                res.status(404).json({ msg: 'Usuario não encontrado!' });
-                return;
+                res.status(404).json({ msg: 'Usuario não encontrado!' })
+                return
             }
 
-            res.json(usuario);
+            res.json(usuario)
         } catch (error) {
-            console.error('Erro ao buscar usuario:', error);
-            res.status(500).json({ msg: 'Erro ao buscar o usuario' });
+            console.error('Erro ao buscar usuario:', error)
+            res.status(500).json({ msg: 'Erro ao buscar o usuario' })
         }
     },
     
@@ -65,20 +70,20 @@ const usuarioController = {
 
     update: async (req, res) => {
         try {
-            const id = req.params.id;
+            const id = req.params.id
             const usuario = {
                 nome: req.body.nome,
                 senha: req.body.senha
             }
-            const usuario_atualizado = await UsuarioModel.findByIdAndUpdate(id, usuario, { new: true });
+            const usuario_atualizado = await UsuarioModel.findByIdAndUpdate(id, usuario, { new: true })
             if (!usuario_atualizado) {
-                res.status(404).json({ msg: 'usuario não encontrado' });
-                return;
+                res.status(404).json({ msg: 'usuario não encontrado' })
+                return
             }
 
-            res.status(200).json({ usuario_atualizado, msg: 'usuario atualizado com sucesso!' });
+            res.status(200).json({ usuario_atualizado, msg: 'usuario atualizado com sucesso!' })
         } catch (error) {
-            res.status(500).json({ error, msg: 'Erro ao atualizar o usuario' });
+            res.status(500).json({ error, msg: 'Erro ao atualizar o usuario' })
         }
     },
 }
